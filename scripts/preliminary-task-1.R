@@ -1,48 +1,90 @@
-require(tidyverse)
-require(tidytext)
-require(textstem)
-require(rvest)
-require(qdapRegex)
-require(stopwords)
-require(tokenizers)
+library(tidyverse)
+library(tidytext)
+library(tidymodels)
+library(textstem)
+library(rvest)
+library(qdapRegex)
+library(stopwords)
+library(tokenizers)
+library(modelr)
+library(Matrix)
+library(sparsesvd)
+library(glmnet)
 
-# extract headings function
-heading_fn <- function(.html){
-  out = NULL
-  for (i in 1:6){
-    tag = paste("h", i, sep = "")
-    content = read_html(.html) %>% 
-      html_elements(tag) %>% 
-      html_text2() %>% 
-      str_c(collapse = ' ') %>% 
-      rm_url() %>%
-      rm_email() %>%
-      str_remove_all('\'') %>%
-      str_replace_all(paste(c('\n', 
-                              '[[:punct:]]', 
-                              'nbsp', 
-                              '[[:digit:]]', 
-                              '[[:symbol:]]'),
-                            collapse = '|'), ' ') %>%
-      str_replace_all("([a-z])([A-Z])", "\\1 \\2") %>%
-      toupper() %>%
-      str_replace_all("\\s+", " ")
-    out = paste(out, content) %>% 
-      trimws()
-  }
-  out = trimws(out)
+
+# extract headings with text function
+text_heading_fn <- function(.html){
+  read_html(.html) %>%
+    html_elements('p, h1, h2, h3, h4, h5, h6') %>%
+    html_text2() %>%
+    str_c(collapse = ' ') %>%
+    rm_url() %>%
+    rm_email() %>%
+    str_remove_all('\'') %>%
+    str_replace_all(paste(c('\n', 
+                            '[[:punct:]]', 
+                            'nbsp', 
+                            '[[:digit:]]', 
+                            '[[:symbol:]]'),
+                          collapse = '|'), ' ') %>%
+    str_replace_all("([a-z])([A-Z])", "\\1 \\2") %>%
+    tolower() %>%
+    str_replace_all("\\s+", " ")
+}
+
+
+parse_headings_text <- function(.df){
+  out <- .df %>%
+    filter(str_detect(text_tmp, '<!')) %>%
+    rowwise() %>%
+    mutate(text_headings_clean = text_heading_fn(text_tmp)) %>%
+    unnest(text_headings_clean) 
   return(out)
 }
 
 #loading claims data from example
 load('../data/claims-clean-example.RData')
 
-#creating headings column
-claims_clean = claims_clean %>% 
-  mutate(heading_clean = text_tmp)
+#creating combined column
+claims_clean <- claims_clean %>%
+  parse_headings_text()
 
-for (i in 1:nrow(claims_clean)){
-  claims_clean$heading_clean[i] = heading_fn(claims_clean$heading_clean[i])
-}
-
+# save dataset
 save(claims_clean, file = "../data/claims-clean-task-1.RData")
+load('../data/claims-clean-task-1.RData')
+
+# tokening
+text_tfidf <- claims_clean %>% 
+  unnest_tokens(output = token,
+                input = text_clean,
+                token = 'words',
+                stopwords = str_remove_all(stop_words$word, 
+                                           '[[:punct:]]')) %>% 
+  mutate(token.lem = lemmatize_words(token)) %>% 
+  filter(str_length(token.lem) > 2) %>% 
+  count(.id, bclass, mclass, token.lem, name = 'n') %>% 
+  bind_tf_idf(term = token.lem,
+              document = .id,
+              n = n) %>% 
+  pivot_wider(id_cols = c('.id', 'bclass', 'mclass'),
+              names_from = 'token.lem',
+              values_from = 'tf_idf',
+              values_fill = 0)
+
+
+text_headings_tfidf <- claims_clean %>% 
+  unnest_tokens(output = token,
+                input = text_headings_clean,
+                token = 'words',
+                stopwords = str_remove_all(stop_words$word, 
+                                           '[[:punct:]]')) %>% 
+  mutate(token.lem = lemmatize_words(token)) %>% 
+  filter(str_length(token.lem) > 2) %>% 
+  count(.id, bclass, mclass, token.lem, name = 'n') %>% 
+  bind_tf_idf(term = token.lem,
+              document = .id,
+              n = n) %>% 
+  pivot_wider(id_cols = c('.id', 'bclass', 'mclass'),
+              names_from = 'token.lem',
+              values_from = 'tf_idf',
+              values_fill = 0)
