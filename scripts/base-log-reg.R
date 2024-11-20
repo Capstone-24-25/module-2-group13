@@ -59,6 +59,8 @@ proj_out <- projection_fn(.dtm = train_dtm,
                           .prop = 0.7)
 train_dtm_proj <- proj_out$data
 
+save(proj_out, file = "../results/base-logreg-model/proj-out.RData")
+
 #regression
 train <- train_labels %>% 
   transmute(bclass = factor(bclass)) %>% 
@@ -67,6 +69,9 @@ train <- train_labels %>%
 fit <- glm(bclass ~ ., 
            data = train,
            family = binomial)
+
+#save model
+save(fit, file = "../results/base-logreg-model/base-logreg-model.RData")
 
 test_proj <- reproject_fn(.dtm = test_dtm, 
                           proj_out)
@@ -84,7 +89,7 @@ pred_df <- test_labels %>%
 
 #save pred_df
 base_pred_df <- pred_df
-save(base_pred_df, file = '../results/base-logreg-preds.RData')
+save(base_pred_df, file = '../results/base-logreg-model/base-logreg-preds.RData')
 
 #metrics
 class_metrics = metric_set(sensitivity,
@@ -100,4 +105,4 @@ metrics <- pred_df %>%
 
 #save metrics
 base_metrics <- metrics
-save(base_metrics, file = '../results/base_metrics.RData')
+save(base_metrics, file = '../results/base-logreg-model/base_metrics.RData')
