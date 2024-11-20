@@ -47,7 +47,7 @@ text_bigram <- claims_clean %>%
 # LPCR
 set.seed(123)
 split <- initial_split(text_word, 
-                       prop = 0.8,
+                       prop = 0.7,
                        strata = 'bclass')
 
 word_train <- training(split)
@@ -60,10 +60,10 @@ features_train <- features_train[, apply(features_train, 2, var) != 0]
 features_test <- word_test %>% select(-.id,-bclass, -mclass)
 features_test <- features_test[, apply(features_test, 2, var) != 0]
 
-#train
+#train model
 pca_model <- prcomp(features_train, scale. = TRUE)
-explained_variance <- cumsum(pca_model$sdev^2) / sum(pca_model$sdev^2)
-num_components <- which(explained_variance >= 0.9)[1]
+#explained_variance <- cumsum(pca_model$sdev^2) / sum(pca_model$sdev^2)
+#num_components <- which(explained_variance >= 0.9)[1]
 
 # Transform both training and testing datasets using the same PCA model
 pca_train <- predict(pca_model, newdata = word_train)
@@ -73,7 +73,7 @@ logistic_model <- glm(y_train ~ ., data = as.data.frame(pca_train), family = "bi
 
 predictions <- predict(logistic_model, newdata = as.data.frame(pca_test), type = "response")
 predicted_classes <- ifelse(predictions > 0.5, 1, 0)
-accuracy <- mean(predicted_classes == pca_test$bclass)
+#accuracy <- mean(predicted_classes == pca_test$bclass)
 
 roc_curve <- roc(word_test$bclass, predictions)
 auc(roc_curve)
@@ -81,7 +81,7 @@ auc(roc_curve)
 ## bigrams
 set.seed(123)
 split_bigram <- initial_split(text_bigram, 
-                       prop = 0.8,
+                       prop = 0.7,
                        strata = 'bclass')
 
 bigram_train <- training(split_bigram)
