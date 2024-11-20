@@ -1,0 +1,67 @@
+---
+title: "cui_rf"
+author: "christina"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tidymodels)
+library(readr)
+library(glmnet)
+library(randomForest)
+library(tidytext)
+library(keras3)
+library(caret)
+
+```
+
+```{r}
+load("~/Desktop/UCSB/Statistics & Data Science/PSTAT 197/module-2-group13/data/claims-clean-example.RData")
+
+```
+
+```{r}
+set.seed(188)
+trainIndex <- createDataPartition(data$label, p = 0.8, list = FALSE)
+trainData <- data[trainIndex, ]
+testData <- data[-trainIndex, ]
+
+```
+
+```{r}
+rf_model <- randomForest(
+  label ~ ., 
+  data = trainData,
+  ntree = 500,    
+  mtry = 2,       
+  importance = TRUE
+)
+
+```
+
+```{r}
+predictions <- predict(rf_model, newdata = testData)
+# confusionMatrix(predictions, testData$label)  # Replace `label` as appropriate
+accuracy <- binary_accuracy(testData$label, predictions)
+print(paste("Binary Accuracy:", round(accuracy, 4)))
+```
+
+```{r}
+pred_df <- data.frame(
+  .id = testData$.id,         # Replace with the appropriate ID column
+  bclass.pred = predictions,  # For binary classification
+  mclass.pred = predictions   # For multiclass (adjust as needed)
+)
+save(pred_df, file = "results/preds-rf.RData")
+
+```
+
+```{r}
+importance(rf_model)
+varImpPlot(rf_model)
+
+```
+
