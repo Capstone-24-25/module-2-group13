@@ -15,12 +15,6 @@ library(randomForest)
 library(tidytext)
 library(keras3)
 library(caret)
-library(tensorflow)
-library(tokenizers)
-library(textstem)
-library(stopwords)
-library(sparsesvd)
-library(Matrix)
 
 ```
 
@@ -39,10 +33,10 @@ testData <- data[-trainIndex, ]
 
 ```{r}
 rf_model <- randomForest(
-  label ~ .,  # Replace `label` with the actual column name for the target variable
+  label ~ ., 
   data = trainData,
-  ntree = 500,    # Number of trees
-  mtry = 2,       # Number of features to sample (adjust based on dataset)
+  ntree = 500,    
+  mtry = 2,       
   importance = TRUE
 )
 
@@ -50,8 +44,9 @@ rf_model <- randomForest(
 
 ```{r}
 predictions <- predict(rf_model, newdata = testData)
-confusionMatrix(predictions, testData$label)  # Replace `label` as appropriate
-
+# confusionMatrix(predictions, testData$label)  # Replace `label` as appropriate
+accuracy <- binary_accuracy(testData$label, predictions)
+print(paste("Binary Accuracy:", round(accuracy, 4)))
 ```
 
 ```{r}
