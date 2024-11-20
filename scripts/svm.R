@@ -11,6 +11,9 @@ library(e1071)
 
 load("./data/claims-clean-example.RData")
 
+url <- 'https://raw.githubusercontent.com/pstat197/pstat197a/main/materials/activities/data/'
+source(paste(url, 'projection-functions.R', sep = ''))
+
 text_word <- claims_clean %>% 
   unnest_tokens(output = token,
                 input = text_clean,
@@ -31,70 +34,67 @@ text_word <- claims_clean %>%
 
 #########svm bclass
 set.seed(123)
-split <- initial_split(text_word, 
-                       prop = 0.7,
-                       strata = 'bclass')
+partitions_svmb <- text_word %>% initial_split(text_word, 
+                                          prop = 0.7,
+                                          strata = 'bclass')
 
-svm_bclass_train <- training(split) %>% select(-.id, -mclass)
-svm_bclass_test <- testing(split) %>% select(-.id, -mclass)
+test_dtm_svmb <- testing(partitions_svmb) %>%
+  select(-.id, -bclass, -mclass)
+test_labels_svmb <- testing(partitions_svmb) %>%
+  select(.id, bclass, mclass)
 
-svm_y_train <- svm_bclass_train$bclass
+train_dtm_svmb <- training(partitions_svmb) %>%
+  select(-.id, -bclass, -mclass)
+train_labels_svmb <- training(partitions_svmb) %>%
+  select(.id, bclass, mclass)
 
-features_train_svm <- svm_bclass_train %>% select(-bclass)
-features_train_svm <- features_train_svm[, apply(features_train_svm, 2, var) != 0]
-features_test_svm <- svm_bclass_test %>% select(-bclass)
-features_test_svm <- features_test_svm[, apply(features_test_svm, 2, var) != 0]
+proj_out_svmb <- projection_fn(.dtm = train_dtm_svmb, .prop = 0.7)
+train_dtm_projected_svmb <- proj_out_svmb$data
 
-#train model
-pca_model_svm <- prcomp(features_train_svm, scale. = TRUE)
+test_proj_svmb <- reproject_fn(.dtm = test_dtm_svmb, 
+                          proj_out_svmb)
 
-# Transform both training and testing datasets using the same PCA model
-pca_train_svm <- predict(pca_model_svm, newdata = svm_bclass_train)
-pca_test_svm <- predict(pca_model_svm, newdata = svm_bclass_test)
+train_svmb <- train_labels_svmb %>%
+  transmute(bclass = factor(bclass)) %>%
+  bind_cols(train_dtm_projected_svmb)
 
-svm_model <- svm(svm_y_train ~ ., data = pca_train_svm, kernel = "radial", cost = 1, gamma = 0.1)
+svm_model <- svm(bclass ~ ., data = train_svmb, kernel = "radial", cost = 1, gamma = 0.1)
 
-svm_predictions <- predict(svm_model, newdata = pca_test_svm)
+svm_predictions <- predict(svm_model, newdata = as.matrix(test_proj_svmb))
+confusion_matrix_svmb <- table(Predicted = svm_predictions, Actual = test_labels_svmb$bclass)
+accuracy_svmb <- sum(diag(confusion_matrix_svmb)) / sum(confusion_matrix_svmb) #0.8074324
 
-#svm_predicted_classes <- ifelse(svm_predictions > 0.5, 1, 0)
-
-roc_curve_b <- roc(svm_bclass_test$bclass, svm_predictions)
-auc(roc_curve_b)
-##Area under the curve: 0.4571
+############
 
 ####### mclass
 set.seed(123)
-split_mclass <- initial_split(text_word, 
-                       prop = 0.7,
-                       strata = 'mclass')
+partitions_svm_m <- text_word %>% initial_split(text_word, 
+                                               prop = 0.7,
+                                               strata = 'mclass')
 
-svm_mclass_train <- training(split_mclass) %>% select(-.id, -bclass)
-svm_mclass_test <- testing(split_mclass) %>% select(-.id, -bclass)
+test_dtm_svm_m <- testing(partitions_svm_m) %>%
+  select(-.id, -bclass, -mclass)
+test_labels_svm_m <- testing(partitions_svm_m) %>%
+  select(.id, bclass, mclass)
 
-svm_y_train_mclass <- svm_mclass_train$mclass
+train_dtm_svm_m <- training(partitions_svm_m) %>%
+  select(-.id, -bclass, -mclass)
+train_labels_svmb_m <- training(partitions_svm_m) %>%
+  select(.id, bclass, mclass)
 
-features_train_svm_m <- svm_mclass_train %>% select(-mclass)
-features_train_svm_m <- features_train_svm_m[, apply(features_train_svm_m, 2, var) != 0]
-features_test_svm_m <- svm_mclass_test %>% select(-mclass)
-features_test_svm_m <- features_test_svm_m[, apply(features_test_svm_m, 2, var) != 0]
+proj_out_svm_m <- projection_fn(.dtm = train_dtm_svm_m, .prop = 0.7)
+train_dtm_projected_svm_m <- proj_out_svm_m$data
 
-#train model
-pca_model_m <- prcomp(features_train_svm_m, scale. = TRUE)
+test_proj_svm_m <- reproject_fn(.dtm = test_dtm_svm_m, 
+                               proj_out_svm_m)
 
-# Transform both training and testing datasets using the same PCA model
-pca_train_svm_m <- predict(pca_model_m, newdata = svm_mclass_train)
-pca_test_svm_m <- predict(pca_model_m, newdata = svm_mclass_test)
+train_svm_m <- train_labels_svmb_m %>%
+  transmute(mclass = factor(mclass)) %>%
+  bind_cols(train_dtm_projected_svm_m)
 
-svm_model_m <- svm(svm_y_train_mclass ~ ., data = pca_train_svm_m, kernel = "radial", cost = 1, gamma = 0.1)
+svm_model_m <- svm(mclass ~ ., data = train_svm_m, kernel = "radial", cost = 1, gamma = 0.1)
 
-svm_predictions_m <- predict(svm_model_m, newdata = pca_test_svm_m)
+svm_predictions_m <- predict(svm_model_m, newdata = as.matrix(test_proj_svm_m))
 
-##svm_predicted_classes_m <- ifelse(svm_predictions_m > 0.5, 1, 0)
-
-roc_curve_m <- roc(svm_mclass_test$mclass, svm_predictions_m)
-auc(roc_curve_m)
-
-confusion_matrix <- table(Predicted = svm_predictions_m, Actual = svm_mclass_test$mclass)
-accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
-accuracy
-## 0.5042159
+confusion_matrix_svm_m <- table(Predicted = svm_predictions_m, Actual = test_labels_svm_m$mclass)
+accuracy_svm_m <- sum(diag(confusion_matrix_svm_m)) / sum(confusion_matrix_svm_m) #0.7790894

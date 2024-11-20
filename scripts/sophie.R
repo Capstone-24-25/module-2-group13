@@ -9,6 +9,9 @@ library(pROC)
 
 load("./data/claims-clean-example.RData")
 
+url <- 'https://raw.githubusercontent.com/pstat197/pstat197a/main/materials/activities/data/'
+source(paste(url, 'projection-functions.R', sep = ''))
+
 text_word <- claims_clean %>% 
   unnest_tokens(output = token,
                 input = text_clean,
@@ -43,40 +46,40 @@ text_bigram <- claims_clean %>%
               names_from = 'token.lem',
               values_from = 'tf_idf',
               values_fill = 0)
+#####
+set.seed(102722)
+partitions <- text_word %>% initial_split(text_word, 
+                                          prop = 0.7,
+                                          strata = 'bclass')
 
-# LPCR
-set.seed(123)
-split <- initial_split(text_word, 
-                       prop = 0.7,
-                       strata = 'bclass')
+test_dtm <- testing(partitions) %>%
+  select(-.id, -bclass, -mclass)
+test_labels <- testing(partitions) %>%
+  select(.id, bclass, mclass)
 
-word_train <- training(split)
-word_test <- testing(split)
+train_dtm <- training(partitions) %>%
+  select(-.id, -bclass, -mclass)
+train_labels <- training(partitions) %>%
+  select(.id, bclass, mclass)
 
-y_train <- word_train$bclass
+proj_out <- projection_fn(.dtm = train_dtm, .prop = 0.7)
+train_dtm_projected <- proj_out$data
 
-features_train <- word_train %>% select(-.id,-bclass, -mclass)
-features_train <- features_train[, apply(features_train, 2, var) != 0]
-features_test <- word_test %>% select(-.id,-bclass, -mclass)
-features_test <- features_test[, apply(features_test, 2, var) != 0]
+test_proj <- reproject_fn(.dtm = test_dtm, 
+                          proj_out)
 
-#train model
-pca_model <- prcomp(features_train, scale. = TRUE)
-#explained_variance <- cumsum(pca_model$sdev^2) / sum(pca_model$sdev^2)
-#num_components <- which(explained_variance >= 0.9)[1]
+train <- train_labels %>%
+  transmute(bclass = factor(bclass)) %>%
+  bind_cols(train_dtm_projected)
 
-# Transform both training and testing datasets using the same PCA model
-pca_train <- predict(pca_model, newdata = word_train)
-pca_test <- predict(pca_model, newdata = word_test)
+logistic_model <- glm(bclass ~ ., data = train, family = "binomial")
 
-logistic_model <- glm(y_train ~ ., data = as.data.frame(pca_train), family = "binomial")
+predictions <- predict(logistic_model, newdata = as.data.frame(test_proj), type = "response")
 
-predictions <- predict(logistic_model, newdata = as.data.frame(pca_test), type = "response")
-predicted_classes <- ifelse(predictions > 0.5, 1, 0)
-#accuracy <- mean(predicted_classes == pca_test$bclass)
+roc_curve <- roc(test_labels$bclass, predictions)
+auc(roc_curve) #Area under the curve: 0.8344
+####
 
-roc_curve <- roc(word_test$bclass, predictions)
-auc(roc_curve)
 
 ## bigrams
 set.seed(123)
