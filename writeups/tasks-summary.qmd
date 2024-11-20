@@ -1,12 +1,42 @@
 ---
 title: "Summary of exploratory tasks"
-author: 'YOUR NAMES HERE'
+author: 'Daniel Yan, Christine Cui, Sophie Shi, Henry Louie'
 date: today
+code-fold: true
 ---
+
+```{r output = FALSE}
+library(tidyverse)
+library(kableExtra)
+```
 
 ### HTML scraping
 
 Does including header content improve predictions? Answer the question and provide quantitative evidence supporting your answer.
+
+The inclusion of header content did not significantly change the predictions. Below we can see the error metrics for the base logistic regression model run on just the text data. 
+
+```{r}
+#load base logistic regression metrics
+load("../results/base-logreg-model/base_metrics.RData")
+
+#load header logistic regression metrics
+load("../results/headings_metrics.RData")
+
+base_metrics %>% 
+  kable() %>% 
+  kable_styling(full_width = FALSE)
+```
+
+We can see that our area under the ROC curve is approximately 0.8666 and the accuracy of the model was approximately 0.7973 on a testing split. Now comparing that to the metrics of the logistic regression model run with heading data included: 
+
+```{r}
+headings_metrics %>% 
+  kable() %>% 
+  kable_styling(full_width = FALSE)
+```
+
+We can see that the area under the ROC curve dropped down to 0.8486 while the accuracy of the model rose slightly to 0.7987 on a testing split. This indicates that the models are quite similar in performance to each other and as such it does not seem that including header data improved predictions. 
 
 ### Bigrams
 
