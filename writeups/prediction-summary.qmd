@@ -1,6 +1,6 @@
 ---
 title: "Predictive modeling of claims status"
-author: 'Daniel Yan, Christine Cui, Sophie Shi, Henry Louie'
+author: 'Daniel Yan, Christina Cui, Sophie Shi, Henry Louie'
 date: today
 ---
 

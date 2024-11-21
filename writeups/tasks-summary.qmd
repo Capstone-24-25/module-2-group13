@@ -1,6 +1,6 @@
 ---
 title: "Summary of exploratory tasks"
-author: 'Daniel Yan, Christine Cui, Sophie Shi, Henry Louie'
+author: 'Daniel Yan, Christina Cui, Sophie Shi, Henry Louie'
 date: today
 code-fold: true
 ---

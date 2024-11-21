@@ -1,7 +1,8 @@
 ---
 title: "Deliverable 2"
 format: html
-editor: visual
+author: 'Daniel Yan, Christina Cui, Sophie Shi, Henry Louie'
+
 ---
 
 ## RNN and SVM modeling on Binary and Multi-classification text

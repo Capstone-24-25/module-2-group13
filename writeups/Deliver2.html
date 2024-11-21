@@ -7,9 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Daniel Yan, Christina Cui, Sophie Shi, Henry Louie">
-<meta name="dcterms.date" content="2024-11-20">
 
-<title>Predictive modeling of claims status</title>
+<title>Deliverable 2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -25,16 +24,16 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="prediction-summary_files/libs/clipboard/clipboard.min.js"></script>
-<script src="prediction-summary_files/libs/quarto-html/quarto.js"></script>
-<script src="prediction-summary_files/libs/quarto-html/popper.min.js"></script>
-<script src="prediction-summary_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="prediction-summary_files/libs/quarto-html/anchor.min.js"></script>
-<link href="prediction-summary_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="prediction-summary_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="prediction-summary_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="prediction-summary_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="prediction-summary_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="Deliver2_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Deliver2_files/libs/quarto-html/quarto.js"></script>
+<script src="Deliver2_files/libs/quarto-html/popper.min.js"></script>
+<script src="Deliver2_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Deliver2_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Deliver2_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Deliver2_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Deliver2_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Deliver2_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Deliver2_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -47,7 +46,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Predictive modeling of claims status</h1>
+<h1 class="title">Deliverable 2</h1>
 </div>
 
 
@@ -61,12 +60,6 @@ ul.task-list li input[type="checkbox"] {
           </div>
   </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">November 20, 2024</p>
-    </div>
-  </div>
   
     
   </div>
@@ -76,84 +69,26 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="abstract" class="level3">
-<h3 class="anchored" data-anchor-id="abstract">Abstract</h3>
-<p>Provide a 3-5 sentence summary of your work on the primary task. Indicate what input data was used, what method was used for binary class predictions, what method was used for multiclass predictions, and what estimated accuracies were achieved.</p>
-<blockquote class="blockquote">
-<p><em>Header and paragraph content was scraped from the raw webpages and processed into term frequencies of word tokens. For binary classification, a two-layer neural network yielded an estimated 81.4% accuracy; for multiclass classification, a support vector machine gave 78% accuracy.</em></p>
-</blockquote>
-<p>During the preliminary process we found no significant benefits to including headers in the text classification, nor did we see a significant boost in accuracy of the principal component model that uses bigrams. With these results in mind, our team decided to preprocess our text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to “words”. In this case, we directly use the claims_clean in file claims-clean-example.RData to train our model.</p>
-<p>We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with their attached tfidf for that claim.</p>
-<p>Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multi classification and binary classification on the claims.</p>
-<p>For binary classification, we achieved an accuracy of 81.9% for RNN model and an accuracy of 82.26% for SVM model. And for multi-class classification, we achieved an accuracy of 76.73% for the SVM model.</p>
+<section id="rnn-and-svm-modeling-on-binary-and-multi-classification-text" class="level2">
+<h2 class="anchored" data-anchor-id="rnn-and-svm-modeling-on-binary-and-multi-classification-text">RNN and SVM modeling on Binary and Multi-classification text</h2>
+<p>During the preliminary process we found no significant benefits to including headers in the text classification, neither did we see a significant boost in accuracy of the principal component model that using bigrams. With these results in mind, our team decided to preprocess our the text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to “words”.</p>
+<p>We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with there attached tfidf for that claim.</p>
+<p>Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multiclassification and binary classification on the claims. The models and predicted accuracies are described below.</p>
 </section>
-<section id="preprocessing" class="level3">
-<h3 class="anchored" data-anchor-id="preprocessing">Preprocessing</h3>
-<p>In one paragraph lay out your preprocessing pipeline. No need to provide exact step-by-step detail; just give an overview of the main components:</p>
-<ul>
-<li><p>what text content was extracted from HTML</p></li>
-<li><p>how text was cleaned</p></li>
-<li><p>how cleaned text was represented quantitatively</p></li>
-</ul>
-</section>
-<section id="methods" class="level3">
-<h3 class="anchored" data-anchor-id="methods">Methods</h3>
-<p>Describe your final predictive models. Include one paragraph with details on the binary classification approach, and one on the multiclass approach. Include for each:</p>
-<ul>
-<li><p>what ML/statistical method was used</p></li>
-<li><p>model specification and hyperparameter selection</p></li>
-<li><p>training method</p></li>
-</ul>
-<section id="binary-classification-models" class="level4">
-<h4 class="anchored" data-anchor-id="binary-classification-models">Binary Classification Models</h4>
-<p>Our first attempt at finding an optimal model for binary classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the word-tokenized data from the clean-claims-example.Rdata.</p>
+<section id="binary-classification-models" class="level2">
+<h2 class="anchored" data-anchor-id="binary-classification-models">Binary Classification Models</h2>
+<p>Our first attempt at finding an optimal model for binary classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the tokenized data from the clean-claims-example.Rdata.</p>
 <p>After preprocessing the claims data, we partitioned it into training and testing data sets. Additionally, we performed principal component analysis on the data to reduce the dimensionality.</p>
-<p>Finally, we modeled the training data onto our SVM using a radial kernel, with parameters cost equals to 1 and gamma equals to 0.1, and then predicted using the projected testing data. We used a confusion matrix to calculate the accuracy as our metric to measure the capabilities of our SVM model, returning 0.8226351, which is a pretty good result.</p>
-<p>Our second attempt was using the Recurrent Neural Network (RNN) model to predict the binary classification of the claims. Similarly to when we created the SVM, we preprocessed the claims-clean-example.Rdata and partitioned the claims into a training and testing set. Instead of performing principal components however we directly used the RNN on the data.</p>
+<p>Finally, we modeled the training data onto our SVM using radial kernel, and then predicted using the testing data. We used area under the curve as our metric to measure the capabilities of our SVM model, returning 0.4571, a score lower than 0.5, of just guessing the classification.</p>
+<p>Our second attempt was using Recurrent Neural Network (RNN) model to predict the binary classification of the claims. Similarly to when we created the SVM, we preprocessed the claims-clean-example.Rdata and partitioned the claims into a training and testing set. Instead of performing principal component however we directly used the RNN on the the data.</p>
 <p>We used adaptive moment estimation (Adam) as our optimizer and 50 epochs for the RNN model. With these parameters our model returned a binary accuracy of 0.819.</p>
-<p>With these results from our SVM and RNN for binary classification we believe the best model to predict the binary classification of claims is with a recurrent neural network.</p>
+<p>With these results from our SVM and RNN for binary classification we believe the best model to predict in predicting the binary classification of claims is with a recurrent neural network.</p>
 </section>
-<section id="multi-classification-models" class="level4">
-<h4 class="anchored" data-anchor-id="multi-classification-models">Multi-Classification Models</h4>
-<p>Our first attempt at finding an optimal model for multi-class classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the word-tokenized data from the clean-claims-example.Rdata.</p>
-<p>After preprocessing the claims data, we partitioned it into training and testing data sets with 70% training and 30% testing data. Additionally, we performed principal component analysis on the data to reduce the dimensionality.</p>
-<p>Finally, we modeled the training data onto our SVM using a radial kernel, with parameters cost equals to 1 and gamma equals to 0.1, and then predicted using the projected testing data. We used a confusion matrix to calculate the accuracy as our metric to measure the capabilities of our SVM model, returning 76.73%, which is a pretty good result.</p>
-</section>
-</section>
-<section id="results" class="level3">
-<h3 class="anchored" data-anchor-id="results">Results</h3>
-<p>Indicate the predictive accuracy of the binary classifications and the multiclass classifications. Provide a table for each, and report sensitivity, specificity, and accuracy.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
-<p>For SVM binary prediction:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>       model  accuracy Sensitivity Specificity
-1 SVM_bclass 0.8226351   0.7863777    0.866171</code></pre>
-</div>
-</div>
-<p>For SVM Multi-class prediction:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>            model accuracy
-1 SVM Multi-class 0.767285</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                              Sensitivity Specificity
-N/A: No relevant content.       0.8684211   0.6911315
-Physical Activity               0.5000000   0.9868668
-Possible Fatality               0.7557252   0.9740260
-Potentially unlawful activity   0.8446602   0.9734694
-Other claim content             0.2424242   0.9910714</code></pre>
-</div>
-</div>
+<section id="multi-classification-models" class="level2">
+<h2 class="anchored" data-anchor-id="multi-classification-models">Multi-Classification Models</h2>
 </section>
 
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Read <a href="https://yardstick.tidymodels.org/articles/multiclass.html">this article</a> on multiclass averaging.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main>
+</main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
