@@ -42,14 +42,13 @@ We can see that the area under the ROC curve dropped down to 0.8486 while the ac
 
 Do bigrams capture additional information relevant to the classification of interest? Answer the question, **briefly** describe what analysis you conducted to arrive at your answer, and provide quantitative evidence supporting your answer.
 
+```{r}
+load("../results/model_result.RData")
+print(results)
+```
+
+Bigrams don't capture additional information relevant to the classification of interest. Based on the table above, we observed a sensitivity of 0.65, a specificity of 0.93, an accuracy of 0.78, and a roc_auc value of 0.83. Compared to the logistic principal component regression based on word-tokenized data, we observed a lower accuracy and a lower roc_auc value. Thus, using bigrams isn't improving the overall model performance. 
+
 ### Neural net
 
-Summarize the neural network model you trained by desribing:
-
--   architecture
-
--   optimization and loss
-
--   training epochs
-
--   predictive accuracy
+We wasn't able to accomplish a reasonable result for Neural network.
