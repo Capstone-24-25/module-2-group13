@@ -66,9 +66,31 @@ svm_model <- svm(bclass ~ ., data = train_svmb, kernel = "radial", cost = 1, gam
 svm_predictions <- predict(svm_model, newdata = as.matrix(test_proj_svmb))
 confusion_matrix_svmb <- table(Predicted = svm_predictions, Actual = test_labels_svmb$bclass)
 accuracy_svmb <- sum(diag(confusion_matrix_svmb)) / sum(confusion_matrix_svmb) 
-#0.8226351
+
+
+TP <- confusion_matrix_svmb["Relevant claim content", "Relevant claim content"]  # True Positives
+FN <- confusion_matrix_svmb["N/A: No relevant content.", "Relevant claim content"]  # False Negatives
+TN <- confusion_matrix_svmb["N/A: No relevant content.", "N/A: No relevant content."]  # True Negatives
+FP <- confusion_matrix_svmb["Relevant claim content", "N/A: No relevant content."]  # False Positives
+
+sensitivity <- TP / (TP + FN)
+specificity <- TN / (TN + FP)
+
+cat("Sensitivity:", sensitivity, "\n")
+cat("Specificity:", specificity, "\n")
 
 #save model
 save(svm_model, file = "./results/svm_binary/svm_binary_model.RData")
 
+##Sensitivity: 0.7863777
+##Specificity: 0.866171 
+##accuracy: 0.8226351
 
+acc_df <- data.frame(
+  model = "SVM_bclass",
+  accuracy = accuracy_svmb,
+  Sensitivity = sensitivity,
+  Specificity = specificity
+)
+
+save(acc_df, file = "../results/svm_binary/accuracy_svm_b.RData")

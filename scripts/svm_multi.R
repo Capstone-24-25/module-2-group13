@@ -69,5 +69,26 @@ accuracy_svm_m <- sum(diag(confusion_matrix_svm_m)) / sum(confusion_matrix_svm_m
 
 #0.767285
 
+classes_svm_m <- levels(test_labels_svm_m$mclass)
+
+metrics_svm_m <- sapply(classes_svm_m, function(cls) {
+  # Extract confusion matrix values
+  TP <- confusion_matrix_svm_m[cls, cls]
+  FN <- sum(confusion_matrix_svm_m[, cls]) - TP
+  FP <- sum(confusion_matrix_svm_m[cls, ]) - TP
+  TN <- sum(confusion_matrix_svm_m) - TP - FN - FP
+  
+  # Sensitivity and Specificity
+  sensitivity <- TP / (TP + FN)
+  specificity <- TN / (TN + FP)
+  
+  return(c(Sensitivity = sensitivity, Specificity = specificity))
+})
+
+# Convert to a data frame for better readability
+metrics_df <- as.data.frame(t(metrics_svm_m))
+
 #save model
 save(svm_model_m, file = "./results/svm_multi/svm_multi_model.RData")
+save(metrics_df, file = "../results/svm_multi/sensitivity_specificity.RData")
+save(accuracy_svm_m, file = "../results/svm_multi/accuracy_svm_m.RData")
