@@ -57,6 +57,16 @@ train <- train_labels %>%
 
 fit <- glm(bclass~., data = train, family = 'binomial')
 
+test_dtm_projected <- reproject_fn(.dtm = test_dtm, prcomp_out)
+x_test <- as.matrix(test_dtm_projected)
+
+reg_preds <- predict(fit, newx = x_test, type = 'response')
+reg_pred_df <- test_labels %>% 
+  transmute(bclass = as.factor(bclass)) %>% 
+  bind_cols(pred = as.numeric(reg_preds)) %>%
+  mutate(bclass.pred = factor(pred > 0.5, 
+                              labels = levels(bclass)))
+
 #activity2
 # store predictors and response as matrix and vector
 x_train <- train %>% select(-bclass) %>% as.matrix()
@@ -105,4 +115,9 @@ panel <- metric_set(sensitivity,
                     accuracy, 
                     roc_auc)
 
-pred_df %>% panel(truth = bclass, estimate = bclass.pred, pred, event_level = 'second')
+results <- pred_df %>% 
+  panel(truth = bclass, estimate = bclass.pred, pred, event_level = 'second')
+
+save(results, file = "/Users/henrylouie/Downloads/module-2-group13/results/model_result.RData")
+
+getwd()
