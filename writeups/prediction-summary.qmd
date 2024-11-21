@@ -10,6 +10,12 @@ Provide a 3-5 sentence summary of your work on the primary task. Indicate what i
 
 > *Header and paragraph content was scraped from the raw webpages and processed into term frequencies of word tokens. For binary classification, a two-layer neural network yielded an estimated 81.4% accuracy; for multiclass classification, a support vector machine gave 78% accuracy.*
 
+During the preliminary process we found no significant benefits to including headers in the text classification, neither did we see a significant boost in accuracy of the principal component model that using bigrams. With these results in mind, our team decided to preprocess our the text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to "words".
+
+We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with there attached tfidf for that claim.
+
+Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multiclassification and binary classification on the claims. The models and predicted accuracies are described below.
+
 ### Preprocessing
 
 In one paragraph lay out your preprocessing pipeline. No need to provide exact step-by-step detail; just give an overview of the main components:
@@ -29,6 +35,22 @@ Describe your final predictive models. Include one paragraph with details on the
 -   model specification and hyperparameter selection
 
 -   training method
+
+## Binary Classification Models
+
+Our first attempt at finding an optimal model for binary classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the tokenized data from the clean-claims-example.Rdata.
+
+After preprocessing the claims data, we partitioned it into training and testing data sets. Additionally, we performed principal component analysis on the data to reduce the dimensionality.
+
+Finally, we modeled the training data onto our SVM using radial kernel, and then predicted using the testing data. We used confusion matrix to calculate the accuracy as our metric to measure the capabilities of our SVM model, returning 0.8226351, which is a pretty good result.
+
+Our second attempt was using Recurrent Neural Network (RNN) model to predict the binary classification of the claims. Similarly to when we created the SVM, we preprocessed the claims-clean-example.Rdata and partitioned the claims into a training and testing set. Instead of performing principal component however we directly used the RNN on the the data.
+
+We used adaptive moment estimation (Adam) as our optimizer and 50 epochs for the RNN model. With these parameters our model returned a binary accuracy of 0.819.
+
+With these results from our SVM and RNN for binary classification we believe the best model to predict in predicting the binary classification of claims is with a recurrent neural network.
+
+## Multi-Classification Models
 
 ### Results
 
