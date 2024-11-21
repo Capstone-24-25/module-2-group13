@@ -6,37 +6,23 @@ date: today
 
 ### Abstract
 
-Provide a 3-5 sentence summary of your work on the primary task. Indicate what input data was used, what method was used for binary class predictions, what method was used for multiclass predictions, and what estimated accuracies were achieved.
-
-> *Header and paragraph content was scraped from the raw webpages and processed into term frequencies of word tokens. For binary classification, a two-layer neural network yielded an estimated 81.4% accuracy; for multiclass classification, a support vector machine gave 78% accuracy.*
-
 During the preliminary process we found no significant benefits to including headers in the text classification, nor did we see a significant boost in accuracy of the principal component model that uses bigrams. With these results in mind, our team decided to preprocess our text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to "words". In this case, we directly use the claims_clean in file claims-clean-example.RData to train our model. 
 
 We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with their attached tfidf for that claim.
 
-Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multi classification and binary classification on the claims. 
+Using this preprocessed data set, we proceeded to create two different models, SVM, RNN, and Random Forest, to test multi classification and binary classification on the claims. 
 
-For binary classification, we achieved an accuracy of 81.9% for RNN model and an accuracy of 82.26% for SVM model. And for multi-class classification, we achieved an accuracy of 76.73% for the SVM model.
+For binary classification, we achieved an accuracy of 81.9% for RNN model, an accuracy of 82.26% for SVM model, and an accuracy of 77.34% for Random Forest Model. And for multi-class classification, we achieved an accuracy of 76.73% for the SVM model.
 
 ### Preprocessing
 
-In one paragraph lay out your preprocessing pipeline. No need to provide exact step-by-step detail; just give an overview of the main components:
+In our preliminary analysis, as we noticed no significant benefits from using either header nor bigram information, we extracted just the body text from the HTMLs.
 
--   what text content was extracted from HTML
+After, the text was cleaned and all non-letter data was removed leaving us with a clean set of body text from each HTML page - removing things such as punctuation and symbols. Further the data was reduced to all lowercase to ensure homoginity of words that may have been capitalized in some instances. Then the data was tokenized - taking the chunks of text from the HTMLs and reducing them into 1 word tokens to which stop words (words that appear frequently but do not add meaning such as ‘a’ and ‘an’) were removed.
 
--   how text was cleaned
-
--   how cleaned text was represented quantitatively
+Finally, the frequency of words in each document was calculated and turned into TF-IDF numerically which represents how important that certain token word is to the document it is in across a collection of documents. The TF-IDF values were then used in our model building.
 
 ### Methods
-
-Describe your final predictive models. Include one paragraph with details on the binary classification approach, and one on the multiclass approach. Include for each:
-
--   what ML/statistical method was used
-
--   model specification and hyperparameter selection
-
--   training method
 
 #### Binary Classification Models
 
@@ -54,8 +40,8 @@ Our third attempt was using a Random Forest model. After preprocessing the data 
 
 With these results from our SVM, RNN, and Random Forest models for binary classification, we believe the SVM offers the highest binary accuracy, while the Random Forest model provides valuable feature-level insights. In conclusion, the best model to predict the binary classification of claims is with a recurrent neural network.
 
-
 #### Multi-Classification Models
+
 Our first attempt at finding an optimal model for multi-class classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the word-tokenized data from the clean-claims-example.Rdata.
 
 After preprocessing the claims data, we partitioned it into training and testing data sets with 70% training and 30% testing data. Additionally, we performed principal component analysis on the data to reduce the dimensionality.

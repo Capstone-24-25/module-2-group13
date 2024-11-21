@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.553">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -78,32 +78,19 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="abstract" class="level3">
 <h3 class="anchored" data-anchor-id="abstract">Abstract</h3>
-<p>Provide a 3-5 sentence summary of your work on the primary task. Indicate what input data was used, what method was used for binary class predictions, what method was used for multiclass predictions, and what estimated accuracies were achieved.</p>
-<blockquote class="blockquote">
-<p><em>Header and paragraph content was scraped from the raw webpages and processed into term frequencies of word tokens. For binary classification, a two-layer neural network yielded an estimated 81.4% accuracy; for multiclass classification, a support vector machine gave 78% accuracy.</em></p>
-</blockquote>
 <p>During the preliminary process we found no significant benefits to including headers in the text classification, nor did we see a significant boost in accuracy of the principal component model that uses bigrams. With these results in mind, our team decided to preprocess our text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to “words”. In this case, we directly use the claims_clean in file claims-clean-example.RData to train our model.</p>
 <p>We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with their attached tfidf for that claim.</p>
-<p>Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multi classification and binary classification on the claims.</p>
-<p>For binary classification, we achieved an accuracy of 81.9% for RNN model and an accuracy of 82.26% for SVM model. And for multi-class classification, we achieved an accuracy of 76.73% for the SVM model.</p>
+<p>Using this preprocessed data set, we proceeded to create two different models, SVM, RNN, and Random Forest, to test multi classification and binary classification on the claims.</p>
+<p>For binary classification, we achieved an accuracy of 81.9% for RNN model, an accuracy of 82.26% for SVM model, and an accuracy of 77.34% for Random Forest Model. And for multi-class classification, we achieved an accuracy of 76.73% for the SVM model.</p>
 </section>
 <section id="preprocessing" class="level3">
 <h3 class="anchored" data-anchor-id="preprocessing">Preprocessing</h3>
-<p>In one paragraph lay out your preprocessing pipeline. No need to provide exact step-by-step detail; just give an overview of the main components:</p>
-<ul>
-<li><p>what text content was extracted from HTML</p></li>
-<li><p>how text was cleaned</p></li>
-<li><p>how cleaned text was represented quantitatively</p></li>
-</ul>
+<p>In our preliminary analysis, as we noticed no significant benefits from using either header nor bigram information, we extracted just the body text from the HTMLs.</p>
+<p>After, the text was cleaned and all non-letter data was removed leaving us with a clean set of body text from each HTML page - removing things such as punctuation and symbols. Further the data was reduced to all lowercase to ensure homoginity of words that may have been capitalized in some instances. Then the data was tokenized - taking the chunks of text from the HTMLs and reducing them into 1 word tokens to which stop words (words that appear frequently but do not add meaning such as ‘a’ and ‘an’) were removed.</p>
+<p>Finally, the frequency of words in each document was calculated and turned into TF-IDF numerically which represents how important that certain token word is to the document it is in across a collection of documents. The TF-IDF values were then used in our model building.</p>
 </section>
 <section id="methods" class="level3">
 <h3 class="anchored" data-anchor-id="methods">Methods</h3>
-<p>Describe your final predictive models. Include one paragraph with details on the binary classification approach, and one on the multiclass approach. Include for each:</p>
-<ul>
-<li><p>what ML/statistical method was used</p></li>
-<li><p>model specification and hyperparameter selection</p></li>
-<li><p>training method</p></li>
-</ul>
 <section id="binary-classification-models" class="level4">
 <h4 class="anchored" data-anchor-id="binary-classification-models">Binary Classification Models</h4>
 <p>Our first attempt at finding an optimal model for binary classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the word-tokenized data from the clean-claims-example.Rdata.</p>
@@ -191,18 +178,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -234,7 +210,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -242,7 +240,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
