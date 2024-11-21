@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="YOUR NAMES HERE">
+<meta name="author" content="Daniel Yan, Christine Cui, Sophie Shi, Henry Louie">
 <meta name="dcterms.date" content="2024-11-20">
 
 <title>Predictive modeling of claims status</title>
@@ -57,7 +57,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>YOUR NAMES HERE </p>
+             <p>Daniel Yan, Christine Cui, Sophie Shi, Henry Louie </p>
           </div>
   </div>
     
@@ -82,9 +82,10 @@ ul.task-list li input[type="checkbox"] {
 <blockquote class="blockquote">
 <p><em>Header and paragraph content was scraped from the raw webpages and processed into term frequencies of word tokens. For binary classification, a two-layer neural network yielded an estimated 81.4% accuracy; for multiclass classification, a support vector machine gave 78% accuracy.</em></p>
 </blockquote>
-<p>During the preliminary process we found no significant benefits to including headers in the text classification, neither did we see a significant boost in accuracy of the principal component model that using bigrams. With these results in mind, our team decided to preprocess our the text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to “words”.</p>
-<p>We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with there attached tfidf for that claim.</p>
-<p>Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multiclassification and binary classification on the claims. The models and predicted accuracies are described below.</p>
+<p>During the preliminary process we found no significant benefits to including headers in the text classification, nor did we see a significant boost in accuracy of the principal component model that uses bigrams. With these results in mind, our team decided to preprocess our text in a standard format, using the temp_text alone for collection of word predictors, and setting our tokenization to “words”. In this case, we directly use the claims_clean in file claims-clean-example.RData to train our model.</p>
+<p>We used TF-IDF to measure the significance of words in each claim observation using the function, bind_tf_idf(). This produced a data set with each row representing a unique claim, having its unique ID, its multi-classification and its binary classification alongside 33063 tokenized words with their attached tfidf for that claim.</p>
+<p>Using this preprocessed data set, we proceeded to create two different models, SVM and RNN, to test multi classification and binary classification on the claims.</p>
+<p>For binary classification, we achieved an accuracy of 81.9% for RNN model and an accuracy of 82.26% for SVM model. And for multi-class classification, we achieved an accuracy of 76.73% for the SVM model.</p>
 </section>
 <section id="preprocessing" class="level3">
 <h3 class="anchored" data-anchor-id="preprocessing">Preprocessing</h3>
@@ -103,18 +104,22 @@ ul.task-list li input[type="checkbox"] {
 <li><p>model specification and hyperparameter selection</p></li>
 <li><p>training method</p></li>
 </ul>
-</section>
-<section id="binary-classification-models" class="level2">
-<h2 class="anchored" data-anchor-id="binary-classification-models">Binary Classification Models</h2>
-<p>Our first attempt at finding an optimal model for binary classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the tokenized data from the clean-claims-example.Rdata.</p>
+<section id="binary-classification-models" class="level4">
+<h4 class="anchored" data-anchor-id="binary-classification-models">Binary Classification Models</h4>
+<p>Our first attempt at finding an optimal model for binary classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the word-tokenized data from the clean-claims-example.Rdata.</p>
 <p>After preprocessing the claims data, we partitioned it into training and testing data sets. Additionally, we performed principal component analysis on the data to reduce the dimensionality.</p>
-<p>Finally, we modeled the training data onto our SVM using radial kernel, and then predicted using the testing data. We used confusion matrix to calculate the accuracy as our metric to measure the capabilities of our SVM model, returning 0.8226351, which is a pretty good result.</p>
-<p>Our second attempt was using Recurrent Neural Network (RNN) model to predict the binary classification of the claims. Similarly to when we created the SVM, we preprocessed the claims-clean-example.Rdata and partitioned the claims into a training and testing set. Instead of performing principal component however we directly used the RNN on the the data.</p>
+<p>Finally, we modeled the training data onto our SVM using a radial kernel, with parameters cost equals to 1 and gamma equals to 0.1, and then predicted using the projected testing data. We used a confusion matrix to calculate the accuracy as our metric to measure the capabilities of our SVM model, returning 0.8226351, which is a pretty good result.</p>
+<p>Our second attempt was using the Recurrent Neural Network (RNN) model to predict the binary classification of the claims. Similarly to when we created the SVM, we preprocessed the claims-clean-example.Rdata and partitioned the claims into a training and testing set. Instead of performing principal components however we directly used the RNN on the data.</p>
 <p>We used adaptive moment estimation (Adam) as our optimizer and 50 epochs for the RNN model. With these parameters our model returned a binary accuracy of 0.819.</p>
-<p>With these results from our SVM and RNN for binary classification we believe the best model to predict in predicting the binary classification of claims is with a recurrent neural network.</p>
+<p>With these results from our SVM and RNN for binary classification we believe the best model to predict the binary classification of claims is with a recurrent neural network.</p>
 </section>
-<section id="multi-classification-models" class="level2">
-<h2 class="anchored" data-anchor-id="multi-classification-models">Multi-Classification Models</h2>
+<section id="multi-classification-models" class="level4">
+<h4 class="anchored" data-anchor-id="multi-classification-models">Multi-Classification Models</h4>
+<p>Our first attempt at finding an optimal model for multi-class classification of the claims was to use Support Vector Machine (SVM) to analyze and classify the word-tokenized data from the clean-claims-example.Rdata.</p>
+<p>After preprocessing the claims data, we partitioned it into training and testing data sets with 70% training and 30% testing data. Additionally, we performed principal component analysis on the data to reduce the dimensionality.</p>
+<p>Finally, we modeled the training data onto our SVM using a radial kernel, with parameters cost equals to 1 and gamma equals to 0.1, and then predicted using the projected testing data. We used a confusion matrix to calculate the accuracy as our metric to measure the capabilities of our SVM model, returning 76.73%, which is a pretty good result.</p>
+</section>
+</section>
 <section id="results" class="level3">
 <h3 class="anchored" data-anchor-id="results">Results</h3>
 <p>Indicate the predictive accuracy of the binary classifications and the multiclass classifications. Provide a table for each, and report sensitivity, specificity, and accuracy.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
@@ -140,7 +145,6 @@ Potentially unlawful activity   0.8446602   0.9734694
 Other claim content             0.2424242   0.9910714</code></pre>
 </div>
 </div>
-</section>
 </section>
 
 
