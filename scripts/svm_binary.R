@@ -8,6 +8,8 @@ library(glmnet)
 library(pROC)
 library(caret)
 library(e1071)
+library(rsample)
+library(irlba)
 
 # use clean dataset with text
 load("./data/claims-clean-example.RData")
@@ -35,6 +37,7 @@ text_word <- claims_clean %>%
 
 ####svm bclass
 set.seed(123)
+
 partitions_svmb <- text_word %>% initial_split(text_word, 
                                           prop = 0.7,
                                           strata = 'bclass')
